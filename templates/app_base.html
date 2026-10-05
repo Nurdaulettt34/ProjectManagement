@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="wrap wide" id="workspace">
+ <div class="app">
+  <div class="bar"><span class="dots"><i style="background:#ff7468"></i><i style="background:#ffc553"></i><i style="background:#59ca7a"></i></span><span>workspace.uniflow · SDU</span><span>{{ user.email }}</span></div>
+  <div class="layout">
+   <aside>
+    <div class="aside-label">WORKSPACE</div>
+    <a class="it {% if active == 'documents' %}on{% endif %}" href="{{ url_for('pages.workspace') }}" {% if active == 'documents' %}aria-current="page"{% endif %}><span>📄 Documents</span></a>
+    <a class="it {% if active == 'profile' %}on{% endif %}" href="{{ url_for('pages.profile') }}" {% if active == 'profile' %}aria-current="page"{% endif %}><span>👤 My profile</span></a>
+    <a class="it" href="{{ url_for('pages.welcome') }}"><span>🧭 Getting started</span></a>
+    <div class="aside-label">COMING SOON</div>
+    <div class="it off"><span>🔎 Smart search</span><small>soon</small></div>
+    <div class="it off"><span>📨 Requests</span><small>soon</small></div>
+    <div class="it off"><span>🔀 Workflows</span><small>soon</small></div>
+   </aside>
+   <div class="main">
+    {% block main %}{% endblock %}
+   </div>
+  </div>
+ </div>
+</div>
+{% endblock %}

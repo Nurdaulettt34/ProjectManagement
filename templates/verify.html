@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Confirm your email{% endblock %}
+{% block header_wrap %}{% endblock %}
+{% block content %}
+<div class="wrap auth-wrap">
+  <div class="auth-card">
+    <div class="eyebrow">STEP 2 OF 2</div>
+    <h2>Confirm your email</h2>
+    <p class="auth-sub" id="verify-sub">
+      {% if email %}We sent a 6-digit code to <b>{{ email }}</b>. Check your inbox and the Spam folder.
+      {% else %}Enter the email you registered with and the 6-digit code we sent to it.{% endif %}
+    </p>
+
+    <form id="verify-form" novalidate data-resend="{{ resend_seconds }}">
+      <label class="field" {% if email %}hidden{% endif %}>
+        <span>Email</span>
+        <input type="email" id="email" name="email" value="{{ email }}" required autocomplete="email">
+      </label>
+      <label class="field">
+        <span>Verification code</span>
+        <input type="text" id="code" name="code" class="code-input" inputmode="numeric" autocomplete="one-time-code"
+               maxlength="7" placeholder="••••••" required>
+      </label>
+
+      <div class="msg" id="msg" role="alert"></div>
+
+      <button type="submit" class="btn auth-btn">Confirm</button>
+    </form>
+
+    <div class="resend-row">
+      <span>Didn't get the code?</span>
+      <button type="button" class="linkbtn" id="resend-btn">Send a new code</button>
+    </div>
+    <p class="auth-switch"><a href="{{ url_for('auth.register_page') }}">Use a different email</a></p>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='auth.js') }}"></script>
+<script>initVerifyForm();</script>
+{% endblock %}

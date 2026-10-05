@@ -1,0 +1,2 @@
+Alembic migrations (Flask-Migrate). Apply: `flask db upgrade`.
+After changing uniflow/models.py: `flask db migrate -m "describe change"`, review the file, commit it.

@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}SDU document assistant{% endblock %}
+{% block nav %}
+<nav>
+  <a href="#how">How it works</a>
+  <a href="#who">Who it's for</a>
+  <a href="#features">Features</a>
+</nav>
+{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="wrap wide">
+    <span class="pill">✦ AI document assistant for SDU</span>
+    <h1>University paperwork, <span class="grad">without the confusion.</span></h1>
+    <p>Upload a certificate, application or regulation. UniFlow tells you what the document is,
+       pulls out the important details and explains it in a few short points.</p>
+    <div class="row">
+      {% if user %}
+        <a class="btn lg" href="{{ url_for('pages.workspace') }}">Open my documents →</a>
+      {% else %}
+        <a class="btn lg" href="{{ url_for('auth.register_page') }}">Create a free account</a>
+        <a class="btn sec lg" href="{{ url_for('auth.login_page') }}">I already have an account</a>
+      {% endif %}
+    </div>
+    <div class="hero-note">PDF and DOCX · Russian, Kazakh and English · your files are visible only to you</div>
+
+    <div class="preview" aria-hidden="true">
+      <div class="bar"><span class="dots"><i style="background:#ff7468"></i><i style="background:#ffc553"></i><i style="background:#59ca7a"></i></span><span>workspace.uniflow · SDU</span><span></span></div>
+      <div class="preview-body">
+        <div class="pv-file"><b>📄 enrollment_certificate.pdf</b><span>PDF · 142 KB</span></div>
+        <div class="pv-type"><span class="eyebrow">DETECTED TYPE</span><strong>Certificate</strong><span class="tag ok">94% confident</span></div>
+        <div class="pv-fields">
+          <div class="fld"><span class="fld-name">Full name</span><span>Aigerim Sadykova</span></div>
+          <div class="fld"><span class="fld-name">Issue date</span><span>15.09.2026</span></div>
+          <div class="fld unclear"><span class="fld-name">Document number</span><span>№ 12?4 — please check</span></div>
+          <div class="fld missing"><span class="fld-name">Purpose</span><span>Not found in the document</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="how">
+  <div class="wrap wide">
+    <div class="lab">How it works</div>
+    <h2 class="sec-title">From a file to clear answers in four steps</h2>
+    <div class="steps four">
+      <div><b>01</b><h4>Upload</h4><p>Drop a PDF or DOCX. We check that the file is real and keep the original safe.</p></div>
+      <div><b>02</b><h4>Recognize</h4><p>The assistant decides what the document is: certificate, application, transcript, ID and more.</p></div>
+      <div><b>03</b><h4>Check the details</h4><p>Names, dates and numbers are extracted. Anything unclear or missing is highlighted — never invented.</p></div>
+      <div><b>04</b><h4>Understand</h4><p>Get a 3–7 point summary: deadlines, requirements and the documents you need.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec alt" id="who">
+  <div class="wrap wide">
+    <div class="lab">Who it's for</div>
+    <h2 class="sec-title">Built for SDU students and future students</h2>
+    <div class="who-grid">
+      <div class="who-card">
+        <span class="who-ico">🎓</span>
+        <h3>SDU students</h3>
+        <p>Sign up with your university email (…@sdu.edu.kz). Keep certificates, transcripts and
+           applications in one place and quickly check what each document says.</p>
+      </div>
+      <div class="who-card">
+        <span class="who-ico">✏️</span>
+        <h3>Applicants</h3>
+        <p>Planning to enter SDU? Register with any email, upload admission requirements or forms
+           and see the deadlines and required documents at a glance.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="features">
+  <div class="wrap wide">
+    <div class="lab">Features</div>
+    <h2 class="sec-title">What you can do today — and what's next</h2>
+    <div class="feat-grid">
+      <div class="feat"><h4>🔐 Confirmed accounts</h4><p>Every account is confirmed with a code sent to the email.</p></div>
+      <div class="feat"><h4>🧠 Document type detection</h4><p>Works with Russian, Kazakh and English documents.</p></div>
+      <div class="feat"><h4>🧾 Key field extraction</h4><p>Edit any field yourself — the original file never changes.</p></div>
+      <div class="feat"><h4>📝 Short summaries</h4><p>Only facts taken from the document's own text.</p></div>
+      <div class="feat soon"><h4>🔎 Smart search <small>soon</small></h4><p>Ask questions across all your documents.</p></div>
+      <div class="feat soon"><h4>📨 Requests <small>soon</small></h4><p>Send requests to university offices and track their status.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="wrap wide">
+    <h2>Ready to sort out your documents?</h2>
+    {% if user %}
+      <a class="btn lg" href="{{ url_for('pages.workspace') }}">Open my documents →</a>
+    {% else %}
+      <a class="btn lg" href="{{ url_for('auth.register_page') }}">Get started</a>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

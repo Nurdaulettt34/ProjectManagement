@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Create account{% endblock %}
+{% block header_wrap %}{% endblock %}
+{% block guest_actions %}<a class="btn sec sm" href="{{ url_for('auth.login_page') }}">Log in</a>{% endblock %}
+{% block content %}
+<div class="wrap auth-wrap">
+  <div class="auth-card">
+    <div class="eyebrow">CREATE ACCOUNT</div>
+    <h2>Sign up for UniFlow</h2>
+    <p class="auth-sub">For SDU students and future applicants. Your documents are visible only to you.</p>
+
+    <form id="register-form" novalidate data-student-domain="{{ student_domain }}">
+      <fieldset class="field role-pick">
+        <span>I am</span>
+        <div class="seg">
+          <label><input type="radio" name="role" value="student" checked> an SDU student</label>
+          <label><input type="radio" name="role" value="applicant"> an applicant</label>
+        </div>
+      </fieldset>
+      <label class="field">
+        <span>Full name</span>
+        <input type="text" id="full_name" name="full_name" placeholder="Aigerim Sadykova" required maxlength="120" autocomplete="name">
+      </label>
+      <label class="field">
+        <span id="email-label">University email</span>
+        <input type="email" id="email" name="email" placeholder="name@stu.{{ student_domain }}" required autocomplete="email">
+        <em class="field-hint" id="email-hint">Students sign up with their SDU email (…@{{ student_domain }}).</em>
+      </label>
+      <label class="field">
+        <span>Password</span>
+        <input type="password" id="password" name="password" placeholder="At least 8 characters" required minlength="8" autocomplete="new-password">
+      </label>
+      <label class="field">
+        <span>Confirm password</span>
+        <input type="password" id="confirm" name="confirm" placeholder="Repeat password" required minlength="8" autocomplete="new-password">
+      </label>
+
+      <div class="msg" id="msg" role="alert"></div>
+
+      <button type="submit" class="btn auth-btn">Create account</button>
+      <p class="fine">We'll send a 6-digit code to this email to confirm it belongs to you.</p>
+    </form>
+
+    <p class="auth-switch">Already have an account? <a href="{{ url_for('auth.login_page') }}">Log in</a></p>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='auth.js') }}"></script>
+<script>initAuthForm('register-form', '/api/register', {register: true});</script>
+{% endblock %}

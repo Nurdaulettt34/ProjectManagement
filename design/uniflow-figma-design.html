@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>UniFlow — Document Upload & Text Extraction</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<style>
+:root{--bg:#f7f9fc;--surface:#fff;--soft:#fafbfc;--text:#101828;--muted:#667085;--faint:#98a2b3;--border:#dce3ec;--primary:#4f46e5;--primary-soft:#eeecff;--ok:#067647;--ok-bg:#ecfdf3;--warn:#b54708;--warn-bg:#fff6e5;--err:#b42318;--err-bg:#fef3f2;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1220;--surface:#171b2e;--soft:#1c2137;--text:#eef0f8;--muted:#a3a9c2;--faint:#7d84a0;--border:#2b3150;--primary:#7c74ff;--primary-soft:#26264d;--ok:#5fd39a;--ok-bg:#12301f;--warn:#f0b35a;--warn-bg:#33270f;--err:#ff8c80;--err-bg:#3a1a17}}
+:root[data-theme="dark"]{--bg:#0f1220;--surface:#171b2e;--soft:#1c2137;--text:#eef0f8;--muted:#a3a9c2;--faint:#7d84a0;--border:#2b3150;--primary:#7c74ff;--primary-soft:#26264d;--ok:#5fd39a;--ok-bg:#12301f;--warn:#f0b35a;--warn-bg:#33270f;--err:#ff8c80;--err-bg:#3a1a17}
+html{scroll-behavior:smooth;scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Manrope,system-ui,sans-serif;line-height:1.5}
+a{text-decoration:none;color:inherit}button{font:inherit;cursor:pointer}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+header{border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:env(safe-area-inset-top,0px);z-index:10}
+header .wrap{display:flex;align-items:center;justify-content:space-between;height:68px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;letter-spacing:-.04em}
+.logo i{width:34px;height:34px;border-radius:10px;background:var(--primary);color:#fff;display:grid;place-items:center;font-style:normal}
+.logo b{color:var(--primary)}
+nav{display:flex;gap:26px;font-size:14px;font-weight:600;color:var(--muted)}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 20px;border-radius:11px;background:var(--primary);color:#fff;font-weight:700;font-size:14px;border:0;box-shadow:0 7px 18px rgb(79 70 229/.2)}
+.btn.sec{background:var(--surface);color:var(--text);border:1px solid var(--border);box-shadow:none}
+.btn.sm{padding:8px 14px;font-size:12px;border-radius:9px}
+.hero{text-align:center;padding:72px 0 40px;background-image:linear-gradient(rgb(79 70 229/.05) 1px,transparent 1px),linear-gradient(90deg,rgb(79 70 229/.05) 1px,transparent 1px);background-size:44px 44px}
+.pill{display:inline-block;padding:6px 14px;border-radius:99px;border:1px solid var(--border);background:var(--primary-soft);color:var(--primary);font-size:12px;font-weight:700}
+h1{font-size:clamp(2.4rem,7vw,5.2rem);line-height:.98;letter-spacing:-.06em;font-weight:600;margin:22px auto 0;max-width:900px}
+.grad{display:block;background:linear-gradient(100deg,#4f46e5 15%,#805ad5 52%,#da5d88 95%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{max-width:600px;margin:22px auto 28px;color:var(--muted);font-size:18px}
+.hero .row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.app{margin:8px auto 60px;border:1px solid var(--border);border-radius:18px;background:var(--surface);overflow:hidden;box-shadow:0 30px 80px rgb(30 41 59/.14)}
+.bar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);font-size:11px;color:var(--muted)}
+.dots i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+.layout{display:grid;grid-template-columns:190px 1fr}
+aside{border-right:1px solid var(--border);background:var(--soft);padding:16px}
+aside .logo{font-size:16px;margin-bottom:18px}aside .logo i{width:26px;height:26px;border-radius:8px}
+aside div.it{padding:10px 12px;border-radius:9px;font-size:12px;font-weight:600;color:var(--faint);margin-bottom:4px;display:flex;justify-content:space-between}
+aside div.it.on{background:var(--primary-soft);color:var(--primary)}
+aside small{font-size:9px;background:var(--border);padding:1px 6px;border-radius:9px}
+.main{padding:24px;min-width:0}
+.eyebrow{font-size:11px;font-weight:700;color:var(--faint);letter-spacing:.08em}
+h2{margin:2px 0 0;font-size:22px;letter-spacing:-.03em}
+.drop{margin-top:18px;border:2px dashed var(--border);border-radius:14px;padding:30px 16px;text-align:center;background:var(--soft);transition:.15s}
+.drop.over{border-color:var(--primary);background:var(--primary-soft)}
+.drop strong{display:block;font-size:15px}.drop span{font-size:12px;color:var(--muted)}
+.drop .btn{margin-top:14px}
+.msg{margin-top:12px;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:600;display:none}
+.msg.show{display:block}.msg.err{background:var(--err-bg);color:var(--err)}.msg.ok{background:var(--ok-bg);color:var(--ok)}.msg.info{background:var(--primary-soft);color:var(--primary)}
+.tools{display:flex;gap:10px;margin-top:22px;align-items:center;justify-content:space-between}
+.tools h3{margin:0;font-size:14px}
+input.f{border:1px solid var(--border);background:var(--soft);color:var(--text);padding:8px 12px;border-radius:9px;font:inherit;font-size:12px;min-width:0;width:220px;max-width:100%}
+.tbl{margin-top:10px;border:1px solid var(--border);border-radius:12px;overflow-x:auto}
+.tr{display:grid;grid-template-columns:minmax(160px,1.6fr) .6fr .8fr .8fr;gap:8px;align-items:center;padding:11px 14px;border-top:1px solid var(--border);font-size:12px;min-width:520px;cursor:pointer;background:var(--surface);width:100%;text-align:left;color:inherit;border-left:0;border-right:0;border-bottom:0}
+.tr.h{background:var(--soft);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);cursor:default;border-top:0}
+.tr:not(.h):hover,.tr.sel{background:var(--primary-soft)}
+.tr .n{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.tag{display:inline-block;width:fit-content;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:600}
+.tag.ok{background:var(--ok-bg);color:var(--ok)}.tag.bad{background:var(--err-bg);color:var(--err)}.tag.warn{background:var(--warn-bg);color:var(--warn)}
+.empty{padding:26px;text-align:center;color:var(--faint);font-size:13px;min-width:0}
+.detail{margin-top:18px;border:1px solid var(--border);border-radius:14px;padding:18px;display:none;background:var(--soft)}
+.detail.show{display:block}
+.detail h3{margin:0 0 8px;font-size:16px;word-break:break-all}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 12px;font-size:11px;color:var(--muted)}
+.meta span{background:var(--surface);border:1px solid var(--border);padding:3px 9px;border-radius:99px}
+pre{margin:10px 0;max-height:260px;overflow:auto;white-space:pre-wrap;word-break:break-word;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;font:12px/1.6 "DM Mono",monospace}
+.acts{display:flex;gap:8px;flex-wrap:wrap}
+.sprint{margin-top:22px;border:1px solid var(--border);border-radius:14px;padding:16px;background:var(--surface)}
+.sprint h3{margin:0 0 4px;font-size:13px}.sprint p{margin:0 0 10px;font-size:12px;color:var(--muted)}
+.chk{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.chk div{font-size:12px;padding:9px 12px;border-radius:9px;background:var(--soft);border:1px solid var(--border);color:var(--muted)}
+.chk div.done{background:var(--ok-bg);color:var(--ok);border-color:transparent;font-weight:600}
+.chk div::before{content:"○ "}.chk div.done::before{content:"✓ "}
+section.sec{padding:60px 0;background:var(--surface);border-top:1px solid var(--border)}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px}
+.steps div{border:1px solid var(--border);background:var(--soft);border-radius:16px;padding:22px}
+.steps b{font-family:"DM Mono",monospace;font-size:12px;color:var(--faint)}.steps h4{margin:8px 0 6px;font-size:18px}.steps p{margin:0;color:var(--muted);font-size:14px}
+.lab{color:var(--primary);font-size:12px;font-weight:800;letter-spacing:.15em;text-transform:uppercase}
+footer{padding:26px 0;text-align:center;font-size:12px;color:var(--faint)}
+@media(max-width:760px){nav{display:none}.layout{grid-template-columns:1fr}aside{display:none}.steps,.chk{grid-template-columns:1fr}.tools{flex-direction:column;align-items:stretch}input.f{width:100%}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <a class="logo" href="#"><i>✦</i><span>Uni<b>Flow</b></span></a>
+  <nav><a href="#workspace">Platform</a><a href="#how">How it works</a><a href="#sprint">Sprint 1</a></nav>
+  <a class="btn sm" href="#workspace">Try upload</a>
+</div></header>
+
+<section class="hero"><div class="wrap">
+  <span class="pill">✦ Intelligent University Document Management Assistant</span>
+  <h1>University paperwork,<span class="grad">finally intelligent.</span></h1>
+  <p>Upload an application, request or certificate. UniFlow reads it and creates a digital record — so staff can focus on students, not administration.</p>
+  <div class="row"><a class="btn" href="#workspace">Upload a document →</a><a class="btn sec" href="#how">How it works</a></div>
+</div></section>
+
+<div class="wrap" id="workspace">
+ <div class="app">
+  <div class="bar"><span class="dots"><i style="background:#ff7468"></i><i style="background:#ffc553"></i><i style="background:#59ca7a"></i></span><span>workspace.uniflow.edu</span><span>Student / Staff</span></div>
+  <div class="layout">
+   <aside>
+    <div class="logo"><i>✦</i><span>Uni<b>Flow</b></span></div>
+    <div class="it on">Documents</div>
+    <div class="it">Smart search <small>soon</small></div>
+    <div class="it">Workflows <small>soon</small></div>
+    <div class="it">Departments <small>soon</small></div>
+   </aside>
+   <div class="main">
+    <div class="eyebrow">DOCUMENT CENTER</div>
+    <h2>Upload &amp; text extraction</h2>
+
+    <div class="drop" id="drop">
+      <strong>Drop a document here</strong>
+      <span>Supported formats: PDF, DOCX · up to 10 MB</span><br>
+      <button class="btn sm" id="pick" type="button">⬆ Choose file</button>
+      <input type="file" id="file" hidden>
+    </div>
+    <div class="msg" id="msg" role="status"></div>
+
+    <div class="tools">
+      <h3>Digital records <span id="cnt" style="color:var(--faint);font-weight:500"></span></h3>
+      <input class="f" id="q" placeholder="Filter by name or text…" aria-label="Filter records">
+    </div>
+    <div class="tbl" id="tbl"></div>
+
+    <div class="detail" id="detail"></div>
+
+    <div class="sprint" id="sprint">
+      <h3>Sprint 1 · acceptance checks</h3>
+      <p>Each check turns green when you demonstrate it in the workspace above.</p>
+      <div class="chk" id="chk"></div>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+
+<section class="sec" id="how"><div class="wrap" style="text-align:center">
+  <div class="lab">From inbox to action</div>
+  <h2 style="font-size:clamp(2rem,4vw,3rem);letter-spacing:-.05em;margin-top:10px">One intelligent flow.</h2>
+  <div class="steps" style="text-align:left">
+    <div><b>01 · Sprint 1</b><h4>Upload &amp; extract</h4><p>PDF and DOCX files are validated, read, and stored as a digital record with the original attached.</p></div>
+    <div><b>02 · Next</b><h4>Understand</h4><p>Classify the document type and pull out key fields.</p></div>
+    <div><b>03 · Next</b><h4>Search &amp; route</h4><p>Find documents by describing them; send each one to the right department.</p></div>
+  </div>
+</div></section>
+<footer>UniFlow · Sprint 1 prototype — files are processed in your browser and are not uploaded anywhere.</footer>
+
+<script>
+(function(){
+var MAX=10*1024*1024, KEY='uniflow_records_v1';
+var records=[], originals={}, passed={}, sel=null;
+try{records=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){records=[]}
+try{pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'}catch(e){}
+var $=function(id){return document.getElementById(id)};
+var CHECKS=[['reject','Unsupported file format is rejected'],['extract','Valid document is uploaded and its text is extracted'],['unreadable','Text cannot be extracted from an unreadable document'],['linked','Original document stays linked to the digital record']];
+
+function save(){try{localStorage.setItem(KEY,JSON.stringify(records))}catch(e){}}
+function msg(t,c){var m=$('msg');m.textContent=t;m.className='msg show '+c}
+function fmt(n){return n<1024?n+' B':n<1048576?(n/1024).toFixed(1)+' KB':(n/1048576).toFixed(1)+' MB'}
+function el(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
+
+function checks(){var box=$('chk');box.innerHTML='';CHECKS.forEach(function(c){box.appendChild(el('div',passed[c[0]]?'done':'',c[1]))})}
+
+function sniff(buf,ext){var b=new Uint8Array(buf.slice(0,4));
+  if(ext==='pdf')return b[0]===0x25&&b[1]===0x50&&b[2]===0x44&&b[3]===0x46;
+  return b[0]===0x50&&b[1]===0x4B}
+
+async function readPdf(buf){
+  var pdf=await pdfjsLib.getDocument({data:new Uint8Array(buf)}).promise, out=[];
+  for(var i=1;i<=pdf.numPages;i++){var p=await pdf.getPage(i),c=await p.getTextContent();out.push(c.items.map(function(x){return x.str}).join(' '))}
+  return {text:out.join('\n\n'),pages:pdf.numPages}
+}
+async function readDocx(buf){var r=await mammoth.extractRawText({arrayBuffer:buf});return {text:r.value,pages:null}}
+
+async function handle(file){
+  if(!file)return;
+  var ext=(file.name.split('.').pop()||'').toLowerCase();
+  if(ext!=='pdf'&&ext!=='docx'){passed.reject=1;checks();return msg('Rejected: “'+file.name+'” is not supported. Please upload a PDF or DOCX file.','err')}
+  if(file.size>MAX){passed.reject=1;checks();return msg('Rejected: file is larger than 10 MB.','err')}
+  if(file.size===0){passed.unreadable=1;checks();return msg('Rejected: the file is empty.','err')}
+  msg('Reading “'+file.name+'”…','info');
+  var rec={id:'d'+Date.now(),name:file.name,ext:ext,size:file.size,at:new Date().toLocaleString(),status:'Processed',reviewed:false,text:'',pages:null,error:''};
+  try{
+    var buf=await file.arrayBuffer();
+    if(!sniff(buf,ext)){passed.reject=1;checks();return msg('Rejected: the content of “'+file.name+'” does not match a real '+ext.toUpperCase()+' file.','err')}
+    var r=ext==='pdf'?await readPdf(buf):await readDocx(buf);
+    rec.text=(r.text||'').replace(/[ \t]+/g,' ').trim();rec.pages=r.pages;
+    if(rec.text.length<20)throw new Error('No readable text found — the document may be scanned, empty, or image-only.');
+    originals[rec.id]=file;passed.extract=1;passed.linked=1;
+    msg('Text extracted. Digital record created for “'+file.name+'”.','ok')
+  }catch(e){
+    rec.status='Failed';rec.error=(e&&e.message)||'The file could not be read.';rec.text='';
+    originals[rec.id]=file;passed.unreadable=1;
+    msg('Extraction failed: '+rec.error,'err')
+  }
+  records.unshift(rec);sel=rec.id;save();render();
+}
+
+function render(){
+  var f=$('q').value.toLowerCase().trim();
+  var list=records.filter(function(r){return !f||r.name.toLowerCase().indexOf(f)>-1||r.text.toLowerCase().indexOf(f)>-1});
+  $('cnt').textContent='('+records.length+')';
+  var t=$('tbl');t.innerHTML='';
+  var h=el('div','tr h');['Document','Type','Size','Status'].forEach(function(x){h.appendChild(el('span',null,x))});t.appendChild(h);
+  if(!list.length)t.appendChild(el('div','empty',records.length?'No records match your filter.':'No records yet — upload a PDF or DOCX to create one.'));
+  list.forEach(function(r){
+    var row=el('button','tr'+(r.id===sel?' sel':''));row.type='button';
+    row.appendChild(el('span','n',r.name));row.appendChild(el('span',null,r.ext.toUpperCase()));row.appendChild(el('span',null,fmt(r.size)));
+    var s=r.status==='Failed'?['bad','Failed']:r.reviewed?['ok','Reviewed']:['warn','Needs review'];
+    row.appendChild(el('span','tag '+s[0],s[1]));
+    row.onclick=function(){sel=r.id;render()};t.appendChild(row)
+  });
+  detail();checks();
+}
+
+function detail(){
+  var d=$('detail'),r=records.filter(function(x){return x.id===sel})[0];
+  d.innerHTML='';if(!r){d.className='detail';return}
+  d.className='detail show';
+  d.appendChild(el('h3',null,r.name));
+  var m=el('div','meta');
+  [r.ext.toUpperCase(),fmt(r.size),r.pages?r.pages+' page(s)':null,r.text?r.text.split(/\s+/).length+' words':null,r.at].forEach(function(x){if(x)m.appendChild(el('span',null,x))});
+  d.appendChild(m);
+  if(r.status==='Failed'){d.appendChild(el('div','msg show err','Text could not be extracted: '+r.error))}
+  else{d.appendChild(el('div','eyebrow','EXTRACTED TEXT'));d.appendChild(el('pre',null,r.text))}
+  var a=el('div','acts'),o=originals[r.id];
+  a.appendChild(el('span','tag '+(o?'ok':'warn'),o?'Original file linked':'Original available this session only'));
+  if(o){var b=el('button','btn sec sm','Open original');b.type='button';b.onclick=function(){window.open(URL.createObjectURL(o),'_blank')};a.appendChild(b)}
+  if(r.status!=='Failed'&&!r.reviewed){var v=el('button','btn sm','Mark as reviewed');v.type='button';v.onclick=function(){r.reviewed=true;save();render()};a.appendChild(v)}
+  var x=el('button','btn sec sm','Delete');x.type='button';x.onclick=function(){records=records.filter(function(z){return z.id!==r.id});delete originals[r.id];sel=null;save();render()};a.appendChild(x);
+  d.appendChild(a);
+}
+
+$('pick').onclick=function(){$('file').click()};
+$('file').onchange=function(e){handle(e.target.files[0]);e.target.value=''};
+$('q').oninput=render;
+var dz=$('drop');
+['dragenter','dragover'].forEach(function(n){dz.addEventListener(n,function(e){e.preventDefault();dz.classList.add('over')})});
+['dragleave','drop'].forEach(function(n){dz.addEventListener(n,function(e){e.preventDefault();dz.classList.remove('over')})});
+dz.addEventListener('drop',function(e){handle(e.dataTransfer.files[0])});
+render();
+})();
+</script>
+</body>
+</html>

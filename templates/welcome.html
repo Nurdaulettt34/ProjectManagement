@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}Getting started{% endblock %}
+{% block content %}
+<div class="wrap tour-wrap">
+  <div class="tour" id="tour" data-onboarded="{{ 'true' if user.onboarded_at else 'false' }}">
+    <div class="tour-head">
+      <div class="eyebrow">GETTING STARTED</div>
+      <button type="button" class="linkbtn" id="tour-skip">Skip tour</button>
+    </div>
+
+    <section class="tour-step on" data-step="0">
+      <div class="tour-ico">👋</div>
+      <h2>Welcome, {{ user.full_name.split(' ')[0] }}!</h2>
+      {% if user.role.value == 'student' %}
+      <p>Your SDU account is confirmed. UniFlow keeps your university documents in one place and helps you
+         understand them — certificates, transcripts, applications and regulations.</p>
+      {% else %}
+      <p>Your account is confirmed. UniFlow helps future SDU students make sense of admission documents —
+         requirements, forms and deadlines — before and after applying.</p>
+      {% endif %}
+      <p class="muted">This short tour takes less than a minute.</p>
+    </section>
+
+    <section class="tour-step" data-step="1">
+      <div class="tour-ico">⬆</div>
+      <h2>1. Upload a document</h2>
+      <p>Drag a <b>PDF</b> or <b>DOCX</b> file (up to 20 MB) into <b>My documents</b>. The original is stored
+         securely and is visible only to you.</p>
+      <p class="muted">Tip: scans without a text layer can't be read yet — use the original digital file when possible.</p>
+    </section>
+
+    <section class="tour-step" data-step="2">
+      <div class="tour-ico">🧠</div>
+      <h2>2. We recognize it</h2>
+      <p>The assistant detects the document type and shows how confident it is. If it isn't sure, the
+         document is marked <b>Other</b> instead of guessing.</p>
+    </section>
+
+    <section class="tour-step" data-step="3">
+      <div class="tour-ico">🧾</div>
+      <h2>3. Check the key details</h2>
+      <p>Names, dates and numbers are pulled out for you.</p>
+      <ul class="tour-legend">
+        <li><span class="tag warn">Unclear</span> found, but please double-check</li>
+        <li><span class="tag bad">Missing</span> not in the document — left empty, never invented</li>
+        <li><span class="tag info">Corrected</span> you fixed it yourself</li>
+      </ul>
+      <p>When everything looks right, press <b>Mark as reviewed</b>.</p>
+    </section>
+
+    <section class="tour-step" data-step="4">
+      <div class="tour-ico">📝</div>
+      <h2>4. Get a short summary</h2>
+      <p>Press <b>Summarize</b> to get 3–7 points: deadlines, requirements and the documents you need.
+         Everything comes from the document's own text.</p>
+      <p class="muted">Your profile shows your account details and document statistics. Requests to university
+         offices are coming in the next release.</p>
+    </section>
+
+    <div class="tour-foot">
+      <div class="tour-dots" id="tour-dots"></div>
+      <div class="tour-btns">
+        <button type="button" class="btn sec" id="tour-back">Back</button>
+        <button type="button" class="btn" id="tour-next">Next</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+(function () {
+  var steps = document.querySelectorAll('.tour-step');
+  var dots = document.getElementById('tour-dots');
+  var back = document.getElementById('tour-back');
+  var next = document.getElementById('tour-next');
+  var i = 0;
+  var last = steps.length - 1;
+  var alreadyDone = document.getElementById('tour').dataset.onboarded === 'true';
+
+  for (var k = 0; k < steps.length; k++) dots.appendChild(document.createElement('i'));
+
+  function show(n) {
+    i = Math.max(0, Math.min(last, n));
+    steps.forEach(function (s, idx) { s.classList.toggle('on', idx === i); });
+    Array.prototype.forEach.call(dots.children, function (d, idx) { d.classList.toggle('on', idx === i); });
+    back.style.visibility = i === 0 ? 'hidden' : 'visible';
+    next.textContent = i === last ? (alreadyDone ? 'Back to my documents' : 'Go to my documents →') : 'Next';
+  }
+
+  async function finish() {
+    next.disabled = true;
+    try { await fetch('/api/onboarding/complete', { method: 'POST' }); } catch (e) {}
+    window.location.href = '/app';
+  }
+
+  back.onclick = function () { show(i - 1); };
+  next.onclick = function () { if (i === last) finish(); else show(i + 1); };
+  document.getElementById('tour-skip').onclick = finish;
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight') next.click();
+    if (e.key === 'ArrowLeft' && i > 0) back.click();
+  });
+  show(0);
+})();
+</script>
+{% endblock %}

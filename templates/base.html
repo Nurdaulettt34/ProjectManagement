@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{% block title %}UniFlow{% endblock %} — UniFlow</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="{% block body_class %}{% endblock %}">
+<header><div class="wrap {% block header_wrap %}wide{% endblock %}">
+  <a class="logo" href="{{ url_for('pages.landing') }}"><i>✦</i><span>Uni<b>Flow</b></span></a>
+  {% block nav %}{% endblock %}
+  <div class="user-bar">
+    {% if user %}
+      <a class="who" href="{{ url_for('pages.profile') }}" title="My profile">
+        <span class="avatar">{{ user.full_name[:1] | upper }}</span>
+        <span class="who-name">{{ user.full_name }}</span>
+        <small>{{ user.role.value }}</small>
+      </a>
+      <button class="btn sec sm" id="logout-btn" type="button">Log out</button>
+    {% else %}
+      {% block guest_actions %}
+      <a class="btn sec sm" href="{{ url_for('auth.login_page') }}">Log in</a>
+      <a class="btn sm" href="{{ url_for('auth.register_page') }}">Sign up</a>
+      {% endblock %}
+    {% endif %}
+  </div>
+</div></header>
+
+{% block content %}{% endblock %}
+
+<footer>UniFlow · SDU document assistant · documents and their originals are stored in the university database.</footer>
+
+{% if user %}
+<script>
+document.getElementById('logout-btn').onclick = async function () {
+  await fetch('/api/logout', { method: 'POST' });
+  window.location.href = '/';
+};
+</script>
+{% endif %}
+{% block scripts %}{% endblock %}
+</body>
+</html>

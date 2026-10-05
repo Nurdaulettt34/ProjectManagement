@@ -1,0 +1,25 @@
+{% extends "app_base.html" %}
+{% block title %}My documents{% endblock %}
+{% block main %}
+    <div class="eyebrow">DOCUMENT CENTER</div>
+    <h2>My documents</h2>
+
+    <form id="upload-form" enctype="multipart/form-data">
+      <div class="drop" id="drop">
+        <strong>Drop a document here</strong>
+        <span>PDF or DOCX, up to 20 MB. We detect the type, read the key fields and can summarize it.</span><br>
+        <button class="btn sm" id="pick" type="button">⬆ Choose file</button>
+        <input type="file" id="file" name="file" accept=".pdf,.docx" hidden>
+      </div>
+      <div class="msg" id="msg" role="status" aria-live="polite"></div>
+    </form>
+
+    <div class="tools">
+      <h3>Documents <span id="cnt" style="color:var(--faint);font-weight:500"></span></h3>
+      <input class="f" id="q" placeholder="Search by name or text…" aria-label="Search documents">
+    </div>
+    <div class="tbl" id="tbl"></div>
+
+    <div class="detail" id="detail"></div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='script.js') }}"></script>{% endblock %}

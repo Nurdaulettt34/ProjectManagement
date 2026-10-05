@@ -1,0 +1,67 @@
+{% extends "app_base.html" %}
+{% block title %}My profile{% endblock %}
+{% block main %}
+    <div class="eyebrow">ACCOUNT</div>
+    <h2>My profile</h2>
+
+    <div class="profile-head">
+      <span class="avatar xl" id="p-avatar">{{ user.full_name[:1] | upper }}</span>
+      <div>
+        <div class="p-name" id="p-name">{{ user.full_name }}</div>
+        <div class="p-meta">
+          <span>{{ user.email }}</span>
+          <span class="tag info">{{ 'SDU student' if user.role.value == 'student' else user.role.value | capitalize }}</span>
+          {% if user.email_verified_at %}<span class="tag ok">✓ Email confirmed</span>{% endif %}
+          <span class="muted">Member since {{ user.created_at.strftime('%d.%m.%Y') if user.created_at else '' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats" id="stats">
+      <div class="stat"><b id="s-total">–</b><span>Documents</span></div>
+      <div class="stat"><b id="s-needs">–</b><span>Need review</span></div>
+      <div class="stat"><b id="s-reviewed">–</b><span>Reviewed</span></div>
+      <div class="stat"><b id="s-failed">–</b><span>Unreadable</span></div>
+    </div>
+
+    <div class="pgrid">
+      <section class="panel">
+        <h3>Personal information</h3>
+        <form id="name-form" novalidate>
+          <label class="field"><span>Full name</span>
+            <input type="text" id="full_name" maxlength="120" value="{{ user.full_name }}" required></label>
+          <label class="field"><span>Email</span>
+            <input type="email" value="{{ user.email }}" disabled></label>
+          <div class="msg" id="name-msg" role="status"></div>
+          <button class="btn sm" type="submit">Save changes</button>
+        </form>
+      </section>
+
+      <section class="panel">
+        <h3>Change password</h3>
+        <form id="pw-form" novalidate>
+          <label class="field"><span>Current password</span>
+            <input type="password" id="current_password" autocomplete="current-password" required></label>
+          <label class="field"><span>New password</span>
+            <input type="password" id="new_password" autocomplete="new-password" minlength="8" placeholder="At least 8 characters" required></label>
+          <label class="field"><span>Repeat new password</span>
+            <input type="password" id="new_password2" autocomplete="new-password" minlength="8" required></label>
+          <div class="msg" id="pw-msg" role="status"></div>
+          <button class="btn sm" type="submit">Change password</button>
+        </form>
+      </section>
+
+      <section class="panel">
+        <div class="panel-top"><h3>Recent documents</h3><a class="linkbtn" href="{{ url_for('pages.workspace') }}">All documents →</a></div>
+        <div id="recent" class="recent"><div class="empty">Loading…</div></div>
+      </section>
+
+      <section class="panel soon-panel">
+        <div class="panel-top"><h3>My requests</h3><span class="tag warn">Coming soon</span></div>
+        <p class="muted">Here you'll send requests to university offices (Registrar, Dean's office, Admissions…)
+           and follow their status: <span class="tag">Submitted</span> <span class="tag warn">In review</span>
+           <span class="tag ok">Approved</span> <span class="tag bad">Rejected</span>.</p>
+      </section>
+    </div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='profile.js') }}"></script>{% endblock %}
